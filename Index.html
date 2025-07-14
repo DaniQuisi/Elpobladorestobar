@@ -128,6 +128,72 @@
             box-sizing: border-box; /* Incluye padding y border en el ancho */
         }
         /* --- Fin de estilos para la tabla de inventario --- */
+
+        /* Estilos para la sección de reportes */
+        .report-section {
+            background-color: #f9fafb;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: flex-end; /* Alinea los items al final para que los inputs queden bien */
+        }
+
+        .report-output {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            min-height: 200px;
+            max-height: 600px; /* Limita la altura para permitir scroll */
+            overflow-y: auto; /* Permite scroll vertical */
+            font-size: 0.9rem;
+            color: #374151;
+        }
+
+        .report-output h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #4b5563;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+
+        .report-output ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .report-output li {
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+
+        .report-output li:last-child {
+            border-bottom: none;
+        }
+
+        .report-empty {
+            text-align: center;
+            color: #6b7280;
+            padding: 2rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -152,6 +218,9 @@
                 </button>
                 <button onclick="window.showTab('resumen')" class="tab-button px-6 py-3 rounded-lg font-medium bg-gray-200 hover:bg-gray-300 transition-all">
                     Resumen
+                </button>
+                <button onclick="window.showTab('reportes')" class="tab-button px-6 py-3 rounded-lg font-medium bg-gray-200 hover:bg-gray-300 transition-all">
+                    Reportes
                 </button>
             </div>
         </div>
@@ -261,7 +330,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800">Estadísticas Generales</h2>
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                             <div class="stats-card rounded-lg p-4 text-center">
                                 <div class="text-2xl font-bold">$<span id="totalSales">0</span></div>
                                 <div class="text-sm opacity-90">Ventas Totales</div>
@@ -281,6 +350,10 @@
                                 <div class="text-sm opacity-90">Monto Total a Reponer</div>
                             </div>
                         </div>
+
+                        <button onclick="window.deleteAllSales()" class="btn-danger w-full py-3 text-white font-semibold rounded-lg">
+                            Eliminar Todas las Ventas
+                        </button>
                     </div>
                     
                     <div class="bg-white rounded-xl shadow-lg p-6">
@@ -312,6 +385,45 @@
                             <div class="text-gray-500 text-center py-4">No hay ventas registradas hoy</div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="reportes-tab" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6 report-section">
+                <h2 class="report-title">Generación de Reportes</h2>
+                
+                <div class="report-controls">
+                    <div>
+                        <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio:</label>
+                        <input type="date" id="startDate" class="input-field px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin:</label>
+                        <input type="date" id="endDate" class="input-field px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <button onclick="window.generateSalesReport()" class="btn-primary px-6 py-3 text-white font-semibold rounded-lg self-end">
+                        Reporte de Ventas por Período
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <button onclick="window.generateTopSellingProductsReport()" class="btn-primary px-6 py-3 text-white font-semibold rounded-lg">
+                        Productos Más Vendidos
+                    </button>
+                    <button onclick="window.generateCurrentInventoryReport()" class="btn-primary px-6 py-3 text-white font-semibold rounded-lg">
+                        Inventario Actual
+                    </button>
+                    <button onclick="window.generateProductProfitReport()" class="btn-primary px-6 py-3 text-white font-semibold rounded-lg">
+                        Ganancias por Producto
+                    </button>
+                    <button onclick="window.generateLowStockReport()" class="btn-primary px-6 py-3 text-white font-semibold rounded-lg col-span-full md:col-span-1">
+                        Productos a Reponer
+                    </button>
+                </div>
+                
+                <div id="reportOutput" class="report-output">
+                    <p class="report-empty">Seleccione un reporte para visualizar los resultados aquí.</p>
                 </div>
             </div>
         </div>
@@ -418,7 +530,11 @@
                 
                 // Si el campo es 'price', también actualiza el 'cost'
                 if (field === 'price') {
-                    updateData.cost = value * 0.6; // O tu lógica de cálculo de costo
+                    // Solo recalcular el costo si no ha sido editado manualmente y se mantiene la proporción
+                    const currentProduct = products.find(p => p.id === productId);
+                    if (currentProduct && (!currentProduct.cost || currentProduct.cost === currentProduct.price * 0.6)) {
+                        updateData.cost = value * 0.6; // O tu lógica de cálculo de costo
+                    }
                 }
                  // Si el campo es 'cost', simplemente actualiza el costo
                 if (field === 'cost') {
@@ -446,6 +562,37 @@
             } catch (error) {
                 console.error("Error al eliminar producto de Firestore:", error);
                 alert("Error al eliminar producto: " + error.message);
+            }
+        }
+
+        // Eliminar TODAS las ventas de Firestore
+        async function deleteAllSalesFromFirestore() {
+            try {
+                const confirmDelete = confirm('¿Está seguro de eliminar TODAS las ventas? Esta acción es IRREVERSIBLE y borrará todo el historial de ventas.');
+                if (!confirmDelete) {
+                    return;
+                }
+
+                const ventasCol = collection(db, 'ventas');
+                const ventasSnapshot = await getDocs(ventasCol);
+                
+                if (ventasSnapshot.empty) {
+                    alert('No hay ventas para eliminar.');
+                    return;
+                }
+
+                const deletePromises = [];
+                ventasSnapshot.docs.forEach(d => {
+                    deletePromises.push(deleteDoc(doc(db, 'ventas', d.id)));
+                });
+
+                await Promise.all(deletePromises);
+                console.log('Todas las ventas han sido eliminadas de Firestore.');
+                alert('Todas las ventas han sido eliminadas exitosamente.');
+                await fetchSales(); // Recargar ventas para actualizar la UI
+            } catch (error) {
+                console.error("Error al eliminar todas las ventas de Firestore:", error);
+                alert("Error al eliminar todas las ventas: " + error.message);
             }
         }
 
@@ -497,6 +644,9 @@
                 updateSummaryStats();
                 loadDailySalesChart();
                 loadTodaySales();
+            } else if (tabName === 'reportes') {
+                // Limpiar el área de reportes cuando se entra a la pestaña
+                document.getElementById('reportOutput').innerHTML = '<p class="report-empty">Seleccione un reporte para visualizar los resultados aquí.</p>';
             }
         }
         
@@ -1026,6 +1176,182 @@
             });
         }
         
+        // --- Funciones para Reportes ---
+
+        // Función auxiliar para mostrar el contenido de los reportes
+        function displayReport(title, content) {
+            const reportOutput = document.getElementById('reportOutput');
+            reportOutput.innerHTML = `
+                <h4>${title}</h4>
+                ${content}
+            `;
+        }
+
+        // Reporte de Ventas por Período
+        function generateSalesReport() {
+            const startDateInput = document.getElementById('startDate').value;
+            const endDateInput = document.getElementById('endDate').value;
+
+            if (!startDateInput || !endDateInput) {
+                alert('Por favor, seleccione una fecha de inicio y una fecha de fin para el reporte de ventas.');
+                return;
+            }
+
+            const startDate = new Date(startDateInput);
+            const endDate = new Date(endDateInput);
+            endDate.setHours(23, 59, 59, 999); // Incluir todo el día final
+
+            const filteredSales = sales.filter(sale => {
+                const saleDate = new Date(sale.timestamp);
+                return saleDate >= startDate && saleDate <= endDate;
+            });
+
+            if (filteredSales.length === 0) {
+                displayReport('Reporte de Ventas por Período', '<p class="report-empty">No se encontraron ventas en el período seleccionado.</p>');
+                return;
+            }
+
+            let totalPeriodSales = 0;
+            let reportContent = '<ul>';
+            filteredSales.forEach(sale => {
+                const saleDateTime = sale.timestamp.toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
+                const itemsSold = sale.items.map(item => `${item.name} (x${item.quantity})`).join(', ');
+                reportContent += `<li><strong>${saleDateTime}:</strong> Venta Total: $${sale.total.toFixed(2)} (${itemsSold})</li>`;
+                totalPeriodSales += sale.total;
+            });
+            reportContent += `</ul><p><strong>Total de Ventas en el período: $${totalPeriodSales.toFixed(2)}</strong></p>`;
+
+            displayReport(`Reporte de Ventas del ${startDate.toLocaleDateString()} al ${endDate.toLocaleDateString()}`, reportContent);
+        }
+
+        // Reporte de Productos Más Vendidos
+        function generateTopSellingProductsReport() {
+            const productSales = {};
+
+            sales.forEach(sale => {
+                sale.items.forEach(item => {
+                    if (productSales[item.name]) {
+                        productSales[item.name] += item.quantity;
+                    } else {
+                        productSales[item.name] = item.quantity;
+                    }
+                });
+            });
+
+            const sortedProducts = Object.entries(productSales).sort(([, a], [, b]) => b - a);
+
+            if (sortedProducts.length === 0) {
+                displayReport('Reporte de Productos Más Vendidos', '<p class="report-empty">No hay datos de ventas para generar este reporte.</p>');
+                return;
+            }
+
+            let reportContent = '<ul>';
+            sortedProducts.forEach(([name, quantity]) => {
+                reportContent += `<li>${name}: ${quantity} unidades vendidas</li>`;
+            });
+            reportContent += '</ul>';
+
+            displayReport('Productos Más Vendidos', reportContent);
+        }
+
+        // Reporte de Inventario Actual
+        function generateCurrentInventoryReport() {
+            if (products.length === 0) {
+                displayReport('Reporte de Inventario Actual', '<p class="report-empty">No hay productos en el inventario.</p>');
+                return;
+            }
+
+            let reportContent = '<ul>';
+            products.forEach(product => {
+                const stockStatus = product.stock <= 5 ? ' (¡BAJO STOCK!)' : '';
+                reportContent += `<li><strong>${product.name}</strong> - Stock: ${product.stock} unidades, Precio: $${product.price ? product.price.toFixed(2) : '0.00'} ${stockStatus}</li>`;
+            });
+            reportContent += '</ul>';
+
+            displayReport('Inventario Actual', reportContent);
+        }
+
+        // Reporte de Ganancias por Producto
+        function generateProductProfitReport() {
+            const productProfits = {};
+
+            // Acumular ventas y costos por producto
+            sales.forEach(sale => {
+                sale.items.forEach(item => {
+                    const productId = item.id;
+                    const productName = item.name;
+                    const quantity = item.quantity;
+                    const salePrice = item.price;
+                    const productCost = item.cost || (products.find(p => p.id === productId)?.cost || 0); // Usar costo de la venta o buscar en productos
+
+                    if (!productProfits[productName]) {
+                        productProfits[productName] = { totalRevenue: 0, totalCost: 0, totalQuantity: 0 };
+                    }
+                    productProfits[productName].totalRevenue += salePrice * quantity;
+                    productProfits[productName].totalCost += productCost * quantity;
+                    productProfits[productName].totalQuantity += quantity;
+                });
+            });
+
+            // Calcular ganancia neta por producto
+            const detailedProfits = Object.entries(productProfits).map(([name, data]) => {
+                const netProfit = data.totalRevenue - data.totalCost;
+                return {
+                    name,
+                    totalRevenue: data.totalRevenue,
+                    totalCost: data.totalCost,
+                    netProfit: netProfit,
+                    totalQuantity: data.totalQuantity
+                };
+            }).sort((a, b) => b.netProfit - a.netProfit); // Ordenar por ganancia neta descendente
+
+            if (detailedProfits.length === 0) {
+                displayReport('Reporte de Ganancias por Producto', '<p class="report-empty">No hay datos de ventas para calcular las ganancias.</p>');
+                return;
+            }
+
+            let reportContent = '<ul>';
+            detailedProfits.forEach(product => {
+                reportContent += `<li>
+                    <strong>${product.name}</strong> (${product.totalQuantity} unid.): <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Ventas: $${product.totalRevenue.toFixed(2)} <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Costo: $${product.totalCost.toFixed(2)} <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<strong>Ganancia Neta: $${product.netProfit.toFixed(2)}</strong>
+                </li>`;
+            });
+            reportContent += '</ul>';
+
+            displayReport('Ganancias por Producto', reportContent);
+        }
+        
+        // Reporte de Productos a Reponer (Bajo Stock)
+        function generateLowStockReport() {
+            const lowStockProducts = products.filter(p => p.stock !== undefined && p.stock <= 5);
+
+            if (lowStockProducts.length === 0) {
+                displayReport('Reporte de Productos a Reponer', '<p class="text-green-600 font-semibold text-center py-4">No hay productos con bajo stock. ¡Todo bien!</p>');
+                return;
+            }
+
+            let reportContent = '<ul>';
+            lowStockProducts.forEach(product => {
+                reportContent += `<li>
+                    <strong>${product.name}</strong> (Categoría: ${product.category || 'N/A'}) <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Stock actual: ${product.stock} unidades <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Costo de reposición estimado por unidad: $${(product.cost || 0.00).toFixed(2)}
+                </li>`;
+            });
+            reportContent += '</ul>';
+
+            displayReport('Productos a Reponer (Stock Bajo)', reportContent);
+        }
+
+        // Función para eliminar todas las ventas
+        async function deleteAllSales() {
+            await deleteAllSalesFromFirestore();
+        }
+
+
         // Event listeners
         document.getElementById('categoryFilter').addEventListener('change', loadProducts);
         document.getElementById('receivedAmount').addEventListener('input', updateCart);
@@ -1042,6 +1368,12 @@
         window.addProduct = addProduct;
         window.updateProduct = updateProduct;
         window.deleteProduct = deleteProduct;
+        window.generateSalesReport = generateSalesReport; // Hacer global
+        window.generateTopSellingProductsReport = generateTopSellingProductsReport; // Hacer global
+        window.generateCurrentInventoryReport = generateCurrentInventoryReport; // Hacer global
+        window.generateProductProfitReport = generateProductProfitReport; // Hacer global
+        window.generateLowStockReport = generateLowStockReport; // Hacer global
+        window.deleteAllSales = deleteAllSales; // Hacer global la función para eliminar todas las ventas
 
 
         // Inicialización - Cargar datos al iniciar y mostrar el tab de ventas
